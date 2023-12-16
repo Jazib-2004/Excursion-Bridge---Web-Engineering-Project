@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sign up Form</title>
+    
+</head>
+<body>
+
+<form action ="/auth/signup" method ="POST">
+    <h2>Sign up</h2>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required>
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required>
+<label for="confirmpassword">Confirm Password:</label>
+    <input type="password" id="confirmpassword" name="confirmpassword" required>
+
+
+    <label for="role">Role:</label>
+    <select id="role" name="role" required>
+        <option value="travel_agency">Travel Agency</option>
+        <option value="tourist">Tourist</option>
+    </select>
+
+    <button type="submit">Sign up</button>
+</form>
+
+<div>
+    already registered 
+    <a href="./login"> log in </a>
+</div>
+
+</body>
+</html>
