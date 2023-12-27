@@ -1,58 +1,88 @@
-//cd server/ npm init expres -y nmp install express mysql dotenv --save nodeman --save-dev cors hbs
-
-const cors = require("cors");
 const express = require("express");
-const app = express();
-const mysql = require("mysql");
-const dotenv = require("dotenv");
+const router = express.Router();
 const path = require("path");
-const hbs = require("express-handlebars");
-const corsOptions = {
-  origin: "http://localhost:3000",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // Enable credentials (if needed)
-  optionsSuccessStatus: 200, // Some legacy browsers (IE11, various SmartTVs) choke on 204
-};
+const touristRouter = require('./tourist-page');
+const tourRouter = require('./tour-detail');
+const regRouter = require("./register");
 
-app.use(cors(corsOptions));
-dotenv.config({ path: "./.env" });
+router.get("/",(req, res) => {
+    res.render("index");
+})
 
-const db = mysql.createConnection({
-  host: process.env.database_host,
-  user: process.env.database_user,
-  password: process.env.database_password,
-  database: process.env.database_name,
-});
+router.get("/login",(req, res) => {
+    res.render("login");
+})
 
-db.connect((error) => {
-  if (error) {
-    console.log("database connection error", error);
-  } else {
-    console.log("mysql connected...");
-  }
-});
+router.get("/signup",(req, res) => {
+    res.render("signup");
+})
+//const touristRouter = require('./tourist-page');
+router.use('/tourist', touristRouter);
 
-app.set("view engine", "hbs");
+//landing page for tourist seeingall the trips 
+//'/tourist
 
-const publicdir = path.join(__dirname, "./public");
+ // router.use("/tourist/:id", tourRouter)
+// router.use("/tourist/:id", (req, res, next) => {
 
-// Middleware to parse URL-encoded data
-app.use(express.urlencoded({ extended: false }));
-// Middleware to parse JSON data
-app.use(express.json());
+//     const { id } = req.params;
+//     console.log(id);
+//     req.tourId = id;
+//     // Continue to the next middleware
+//     next();
+// }, tourRouter);
 
-app.use("/", require("./routes/pages"));
-app.use(express.static(publicdir));
-app.use("/auth", require("./routes/auth"));
-// app.use(cors(corsOptions));
-const server = app.listen(5000, () => {
-  console.log("Server is running on port 5000");
-});
+//const tourRouter = require('./tour-detail');
+router.use('/tourist/:userId/:tripId', (req, res, next) => {
+    const { tripId } = req.params;
+    const userId = parseInt(req.params.userId);
+    // Check if id is a valid number before setting req.tourId
+    const tourId = parseInt(tripId);
+    if (!isNaN(tourId)) {
+        req.tourId = tourId;
+        next();
+    } else {
+        // Handle the case where id is not a valid number (redirect, send an error response, etc.)
+        res.status(400).send("Invalid ID");
+    }
+}, tourRouter);
 
-server.on("error", (error) => {
-  if (error.code === "EADDRINUSE") {
-    console.error("Port 5000 is already in use");
-  } else {
-    console.error("An error occurred:", error.message);
-  }
-});
+
+// router.get("/register",(req, res) => {
+//     res.render("register");
+// });
+
+// router.use("/register/:id", (req, res, next) => {
+//     const { id } = req.params;
+//     // Check if id is a valid number before setting req.tourId
+//     const tourId = parseInt(id);
+//     if (!isNaN(tourId)) {
+//         req.tourId = tourId;
+//         next();
+//     } else {
+//         // Handle the case where id is not a valid number (redirect, send an error response, etc.)
+//         res.status(400).send("Invalid ID");
+//     }
+// }, registertour);
+
+//const regRouter = require("./register");
+router.use("/register", (req, res, next) => {
+    const { id } = req.query;
+    
+    // Check if id is a valid number before setting req.tourId
+    const tourId = parseInt(id);
+    
+    if (!isNaN(tourId)) {
+        req.tourId = tourId;
+        const userId = req.query.userId;
+        req.userId = userId;
+        next();
+    } else {
+        // Handle the case where id is not a valid number (redirect, send an error response, etc.)
+        res.status(400).send("Invalid ID");
+    }
+}, regRouter);
+
+
+
+module.exports = router;
