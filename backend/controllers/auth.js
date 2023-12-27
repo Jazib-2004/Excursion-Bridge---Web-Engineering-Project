@@ -42,25 +42,71 @@ exports.login = (req,res) => {
                 return res.status(500).json({ success: false, message: "Internal Server Error",redirectUrl: "/login" });
             }
         
-            if (isMatch) {
-                // Passwords match, user is authenticated
-                // Redirect to a success page or perform other actions
-                // return res.redirect("/tourist");
+        //     if (isMatch) {
+        //         // Passwords match, user is authenticated
+        //         // Redirect to a success page or perform other actions
+        //         // return res.redirect("/tourist");
+        //         res.status(200).json({
+        //             success: true,
+        //             message: "Logged in",
+        //             user: {
+        //                 id: user.id,
+        //                 email: user.email,
+        //             },
+        //             redirectUrl: "/tourist",
+        //         });
+        //     } else {
+        //         // Passwords don't match, show an error message
+        //         return res.render("login", { message: "Password is incorrect" });
+        //     }
+       
+
+        if (isMatch) {
+            // Passwords match, user is authenticated
+            // Check user's role
+            if (user.role === 'tourist') {
+                // Redirect tourist to the tourist page
                 res.status(200).json({
                     success: true,
                     message: "Logged in",
                     user: {
                         id: user.id,
                         email: user.email,
+                        role: user.role,
                     },
                     redirectUrl: "/tourist",
                 });
+            } else if (user.role === 'travelagency') {
+                // Redirect travel agency to the travel agency page
+                res.status(200).json({
+                    success: true,
+                    message: "Logged in",
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role,
+                    },
+                    redirectUrl: "/travelagency",
+                });
             } else {
-                // Passwords don't match, show an error message
-                return res.render("login", { message: "Password is incorrect" });
+                // Handle other roles as needed
+                res.status(200).json({
+                    success: true,
+                    message: "Logged in",
+                    user: {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role,
+                    },
+                    redirectUrl: "/login", // Or any other default redirect for unrecognized roles
+                });
             }
-        });
+        } else {
+            // Passwords don't match, show an error message
+            return res.render("login", { message: "Password is incorrect" });
+        }
         
+    });
        
 
     })
