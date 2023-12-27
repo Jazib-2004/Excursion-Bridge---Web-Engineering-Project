@@ -16,9 +16,12 @@ router.get("/login",(req, res) => {
 router.get("/signup",(req, res) => {
     res.render("signup");
 })
+//const touristRouter = require('./tourist-page');
 router.use('/tourist', touristRouter);
 
-// // router.use("/tourist/:id", tourRouter)
+
+
+ // router.use("/tourist/:id", tourRouter)
 // router.use("/tourist/:id", (req, res, next) => {
 
 //     const { id } = req.params;
@@ -28,10 +31,12 @@ router.use('/tourist', touristRouter);
 //     next();
 // }, tourRouter);
 
-router.use("/tourist/:id", (req, res, next) => {
-    const { id } = req.params;
+//const tourRouter = require('./tour-detail');
+router.use('/tourist/:userId/:tripId', (req, res, next) => {
+    const { tripId } = req.params;
+    const userId = parseInt(req.params.userId);
     // Check if id is a valid number before setting req.tourId
-    const tourId = parseInt(id);
+    const tourId = parseInt(tripId);
     if (!isNaN(tourId)) {
         req.tourId = tourId;
         next();
@@ -59,6 +64,7 @@ router.get("/register",(req, res) => {
 //     }
 // }, registertour);
 
+//const regRouter = require("./register");
 router.use("/register", (req, res, next) => {
     const { id } = req.query;
     
@@ -67,6 +73,8 @@ router.use("/register", (req, res, next) => {
     
     if (!isNaN(tourId)) {
         req.tourId = tourId;
+        const userId = req.query.userId;
+        req.userId = userId;
         next();
     } else {
         // Handle the case where id is not a valid number (redirect, send an error response, etc.)
