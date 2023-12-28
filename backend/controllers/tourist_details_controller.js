@@ -21,4 +21,4 @@ exports.getTouristDetails = (req, res) => {
     });
 };
 
-//<a href="/touristdetails/{{id}}/tourists">View Tourist Details</a>
+//<a href="/touristdetails/{{id}}/tourists">View Tourist Details</a>/
