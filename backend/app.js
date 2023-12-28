@@ -75,10 +75,19 @@ const tripRoutes = require('./routes/tripRoutes');
 
 app.use('/trips', tripRoutes);
 
+
+//to add review fetch url is "/reviews/add"
+//need <input type = hidden value= "userId">
+//need <input type = hidden value= "details"> which is provided to client by trip detail method
+
+//to get review fetch is "/reviews/averageRating"
+const reviewsRoutes = require('./routes/reviewsRoutes');
+app.use('/reviews', reviewsRoutes);
+
+
 const server = app.listen(5000, () => {
     console.log('Server is running on port 5000');
 });
-
 
 
 server.on('error', (error) => {
