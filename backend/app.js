@@ -1,88 +1,90 @@
+//cd server/ npm init expres -y nmp install express mysql dotenv --save nodeman --save-dev cors hbs
+
 const express = require("express");
-const router = express.Router();
+const app = express();
+const mysql = require("mysql");
+const dotenv = require("dotenv");
 const path = require("path");
-const touristRouter = require('./tourist-page');
-const tourRouter = require('./tour-detail');
-const regRouter = require("./register");
+const hbs = require("express-handlebars");
 
-router.get("/",(req, res) => {
-    res.render("index");
+dotenv.config({path : "./.env"});
+
+const db = mysql.createConnection({
+    host : process.env.database_host,
+    user : process.env.database_user,
+    password :process.env.database_password,
+    database : process.env.database_name
 })
 
-router.get("/login",(req, res) => {
-    res.render("login");
-})
+db.connect((error) =>{
 
-router.get("/signup",(req, res) => {
-    res.render("signup");
-})
-//const touristRouter = require('./tourist-page');
-router.use('/tourist', touristRouter);
-
-//landing page for tourist seeingall the trips 
-//'/tourist
-
- // router.use("/tourist/:id", tourRouter)
-// router.use("/tourist/:id", (req, res, next) => {
-
-//     const { id } = req.params;
-//     console.log(id);
-//     req.tourId = id;
-//     // Continue to the next middleware
-//     next();
-// }, tourRouter);
-
-//const tourRouter = require('./tour-detail');
-router.use('/tourist/:userId/:tripId', (req, res, next) => {
-    const { tripId } = req.params;
-    const userId = parseInt(req.params.userId);
-    // Check if id is a valid number before setting req.tourId
-    const tourId = parseInt(tripId);
-    if (!isNaN(tourId)) {
-        req.tourId = tourId;
-        next();
-    } else {
-        // Handle the case where id is not a valid number (redirect, send an error response, etc.)
-        res.status(400).send("Invalid ID");
+    if (error){
+        console.log("database connectionj error")
     }
-}, tourRouter);
-
-
-// router.get("/register",(req, res) => {
-//     res.render("register");
-// });
-
-// router.use("/register/:id", (req, res, next) => {
-//     const { id } = req.params;
-//     // Check if id is a valid number before setting req.tourId
-//     const tourId = parseInt(id);
-//     if (!isNaN(tourId)) {
-//         req.tourId = tourId;
-//         next();
-//     } else {
-//         // Handle the case where id is not a valid number (redirect, send an error response, etc.)
-//         res.status(400).send("Invalid ID");
-//     }
-// }, registertour);
-
-//const regRouter = require("./register");
-router.use("/register", (req, res, next) => {
-    const { id } = req.query;
-    
-    // Check if id is a valid number before setting req.tourId
-    const tourId = parseInt(id);
-    
-    if (!isNaN(tourId)) {
-        req.tourId = tourId;
-        const userId = req.query.userId;
-        req.userId = userId;
-        next();
-    } else {
-        // Handle the case where id is not a valid number (redirect, send an error response, etc.)
-        res.status(400).send("Invalid ID");
+    else{
+        console.log("mysql connected...")
     }
-}, regRouter);
+})
+
+app.set("view engine","hbs");
+
+const publicdir = path.join(__dirname,"./public");
+
+// Middleware to parse URL-encoded data
+app.use(express.urlencoded({ extended: false }));
+// Middleware to parse JSON data
+app.use(express.json());
+
+app.use("/",require("./routes/pages"));
+app.use(express.static(publicdir));
+app.use("/auth",require("./routes/auth"));
+
+app.use('/search', require("./routes/search"));
+//    /search/getToursByDate/:userId/:date
+//    /search/getToursByDestination/:userId/:destination
+//    /search/getToursByCost/:userId/:cost
+
+// for register post method 
+//`/register?id=${tourId}&userId=${userId}`
+
+//route to get to landing page for travel agency which will show all the trips he had added before
+app.use('/travelagency/:userId', require("./routes/travel_agency"));
+//`/travelagency/${userId}/tripsofagency`
+
+app.use('/touristdetails',  require("./routes/touristdetail"));
+// to get users details for a specific trip   --trip id should be provided 
+//"/touristdetails/{{id}}/tourists"
+
+//getting the detail of a specific trip by a tourist 
+//`/tourist/${userId}/${tourId}`
+
+
+const tripRoutes = require('./routes/tripRoutes');
+
+//to add a trip
+//there should be <input type = hidden value= "userId"> -- so i could get the userId
+//in the add page again  <input type = hidden value= "userId">
+//fetch url  is '/trips/add'
+
+//fetch url /trips/delete/${tripIdToDelete}`
+//delete a specific trip
+//require trip id in button form from frontend as <input type=hidden value=trip.id> as trips are already provided 
+
+//edit a trip
+//fetch url /trips/edit/${tripIdToDelete}
+
+app.use('/trips', tripRoutes);
+
+const server = app.listen(5000, () => {
+    console.log('Server is running on port 5000');
+});
 
 
 
-module.exports = router;
+server.on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+        console.error('Port 5000 is already in use');
+    } else {
+        console.error('An error occurred:', error.message);
+    }
+});
